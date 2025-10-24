@@ -5,15 +5,7 @@ from db_connector import DatabaseConnector
 from data_loader import DataLoader
 from query_runner import QueryRunner
 from formatters import JsonFormatter, XmlFormatter
-
-# Database connection settings
-DB_CONFIG = {
-    "dbname": "university_db",
-    "user": "postgres",
-    "password": "7413",
-    "host": "localhost",
-    "port": "5432"
-}
+from config import DB_CONFIG, APP_SETTINGS, FILE_SETTINGS, QUERY_SETTINGS
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -74,6 +66,12 @@ def main():
         print("\nQuery Results:")
         print("-" * 50)
         print(output)
+        
+        # Save to file
+        output_file = f"{FILE_SETTINGS['default_output_file']}.{args.format}"
+        with open(output_file, 'w', encoding=FILE_SETTINGS['encoding']) as f:
+            f.write(output)
+        print(f"\nResults saved to {output_file}")
         
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)

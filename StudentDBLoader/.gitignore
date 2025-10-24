@@ -1,3 +1,8 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
@@ -8,6 +13,20 @@ build/
 develop-eggs/
 dist/
 downloads/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local development
+*.log
+*.sqlite3
+
+# Output files
+output.json
+output.xml
 eggs/
 .eggs/
 lib/

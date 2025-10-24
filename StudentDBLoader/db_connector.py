@@ -1,13 +1,14 @@
 # db_connector.py
 import psycopg2
-import psycopg2.extras  # Добавьте этот импорт
+import psycopg2.extras
 import sys
+from sql_queries import CREATE_TABLES, CREATE_INDEXES
 
 
 class DatabaseConnector:
     """
-    Отвечает за подключение к базе данных PostgreSQL
-    и выполнение SQL-запросов.
+    Handles connection to PostgreSQL database
+    and execution of SQL queries.
     """
 
     def __init__(self, dbname, user, password, host, port):
@@ -21,52 +22,27 @@ class DatabaseConnector:
             )
             self.conn.autocommit = False
         except psycopg2.OperationalError as e:
-            print(f"Ошибка подключения к БД: {e}", file=sys.stderr)
+            print(f"Database connection error: {e}", file=sys.stderr)
             sys.exit(1)
 
     def create_tables(self):
-        """Создает таблицы и индексы."""
+        """Creates tables and indexes."""
         try:
             with self.conn.cursor() as cursor:
-                # Удаление таблиц, если они существуют
-                cursor.execute("""
-                               DROP TABLE IF EXISTS students;
-                               DROP TABLE IF EXISTS rooms CASCADE;
-
-                               CREATE TABLE rooms
-                               (
-                                   id   INT PRIMARY KEY,
-                                   name VARCHAR(100) NOT NULL
-                               );
-
-                               CREATE TABLE students
-                               (
-                                   id       INT PRIMARY KEY,
-                                   name     VARCHAR(255) NOT NULL,
-                                   birthday DATE         NOT NULL,
-                                   sex      CHAR(1)      NOT NULL,
-                                   room_id  INT,
-                                   CONSTRAINT fk_room
-                                       FOREIGN KEY (room_id)
-                                           REFERENCES rooms (id)
-                                           ON DELETE SET NULL
-                               );
-
-                               -- Создаем индексы
-                               CREATE INDEX IF NOT EXISTS idx_students_room_id ON students(room_id);
-                               CREATE INDEX IF NOT EXISTS idx_students_birthday ON students(birthday);
-                               CREATE INDEX IF NOT EXISTS idx_students_sex ON students(sex);
-                               """)
+                # Create tables
+                cursor.execute(CREATE_TABLES)
+                # Create indexes
+                cursor.execute(CREATE_INDEXES)
                 self.conn.commit()
-                print("Таблицы и индексы успешно созданы.")
+                print("Tables and indexes created successfully.")
 
         except Exception as e:
-            print(f"Ошибка при создании таблиц: {e}", file=sys.stderr)
+            print(f"Error creating tables: {e}", file=sys.stderr)
             self.conn.rollback()
             raise
 
     def execute_query(self, query, params=None, fetch_many=False):
-        """Выполняет SQL-запрос и возвращает результат."""
+        """Executes an SQL query and returns the result."""
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(query, params or ())
@@ -74,22 +50,22 @@ class DatabaseConnector:
                     return cursor.fetchall()
                 return cursor.fetchone()
         except Exception as e:
-            print(f"Ошибка выполнения запроса: {e}", file=sys.stderr)
+            print(f"Error executing query: {e}", file=sys.stderr)
             self.conn.rollback()
             raise
 
     def execute_many(self, query, data_list):
-        """Выполняет пакетную вставку данных."""
+        """Performs batch data insertion."""
         try:
             with self.conn.cursor() as cursor:
                 psycopg2.extras.execute_batch(cursor, query, data_list)
                 self.conn.commit()
         except Exception as e:
-            print(f"Ошибка пакетной вставки: {e}", file=sys.stderr)
+            print(f"Batch insert error: {e}", file=sys.stderr)
             self.conn.rollback()
             raise
 
     def close(self):
-        """Закрывает соединение с БД."""
+        """Closes the database connection."""
         if hasattr(self, 'conn') and self.conn:
             self.conn.close()

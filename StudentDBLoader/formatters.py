@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 
 class Formatter(ABC):
-    """Абстрактный базовый класс (интерфейс) для форматировщиков."""
+    """Abstract base class (interface) for formatters."""
 
     @abstractmethod
     def format(self, data: dict) -> str:
@@ -13,26 +13,26 @@ class Formatter(ABC):
 
 
 class JsonFormatter(Formatter):
-    """Конкретная стратегия для вывода в JSON."""
+    """Concrete strategy for JSON output."""
 
     def format(self, data: dict) -> str:
-        return json.dumps(data, indent=4, default=str)  # default=str для обработки дат/возраста
+        return json.dumps(data, indent=4, default=str)  # default=str for handling dates/ages
 
 
 class XmlFormatter(Formatter):
-    """Конкретная стратегия для вывода в XML."""
+    """Concrete strategy for XML output."""
 
     def _dict_to_xml(self, parent_element, data):
-        """Рекурсивный помощник для преобразования dict в XML."""
+        """Recursive helper to convert dict to XML."""
         if isinstance(data, dict):
             for key, value in data.items():
                 element = ET.Element(parent_element, key)
                 self._dict_to_xml(element, value)
         elif isinstance(data, list):
             for item in data:
-                # Для списков обычно создаем элемент 'item' или по имени родителя
+                # For lists, we typically create an 'item' element or use the parent's name
                 item_element_name = parent_element.tag
-                if item_element_name.endswith('s'):  # убираем 's' (e.g. rooms -> room)
+                if item_element_name.endswith('s'):  # remove 's' (e.g. rooms -> room)
                     item_element_name = item_element_name[:-1]
                 else:
                     item_element_name = 'item'
@@ -45,5 +45,5 @@ class XmlFormatter(Formatter):
     def format(self, data: dict) -> str:
         root = ET.Element("results")
         self._dict_to_xml(root, data)
-        # tostring возвращает bytes, декодируем в str
+        # tostring returns bytes, decode to str
         return ET.tostring(root, encoding='unicode', short_empty_elements=False)
