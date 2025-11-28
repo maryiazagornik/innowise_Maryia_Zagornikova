@@ -29,7 +29,8 @@ pyspark-project/
 ├── docker-compose.yml       # Service orchestration
 ├── main.py                  # Application entry point
 ├── requirements.txt         # Python dependencies
-└── .env                     # Secrets (not committed to Git)```
+└── .env                     # Secrets (not committed to Git)
+```
 
 ## Prerequisites
 
@@ -46,13 +47,15 @@ Create a `.env` file in the root directory to store your database credentials.
 ```bash
 # .env
 DB_USER=postgres
-DB_PASSWORD=your_password```
+DB_PASSWORD=your_password
+```
 
 ### 2. Execution
 Run the following command to build the Docker image and execute the pipeline:
 
 ```bash
-docker-compose run spark-job```
+docker-compose run spark-job
+```
 
 ## Analytical Tasks
 
